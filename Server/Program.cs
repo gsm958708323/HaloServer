@@ -11,11 +11,11 @@ namespace Server
     {
         static void Main(string[] args)
         {
-            AsyncServer server = new AsyncServer("127.0.0.1", 8888);
-
-            while (true)
+            SelectServer server = new SelectServer("127.0.0.1", 8888);
+            while(true)
             {
-                Thread.Sleep(100);
+                server.Tick();
+                Thread.Sleep(10);
             }
         }
     }

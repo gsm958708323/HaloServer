@@ -17,7 +17,7 @@ namespace Server
     /// </summary>
     public class AsyncServer
     {
-        Dictionary<Socket, ClientInfo> dictClient = new Dictionary<Socket, ClientInfo>();
+        Dictionary<Socket, ClientState> dictClient = new Dictionary<Socket, ClientState>();
 
         public AsyncServer(string ip, int port)
         {
@@ -43,7 +43,7 @@ namespace Server
             Console.WriteLine("新的客户端连接");
 
             //Recive
-            ClientInfo info = new ClientInfo();
+            ClientState info = new ClientState();
             info.socket = client;
             dictClient.Add(client, info);
 
@@ -55,8 +55,8 @@ namespace Server
 
         private void OnRecive(IAsyncResult ar)
         {
-            ClientInfo clientInfo = (ClientInfo)ar.AsyncState;
-            Socket client = clientInfo.socket;
+            ClientState ClientState = (ClientState)ar.AsyncState;
+            Socket client = ClientState.socket;
             int nCount = client.EndReceive(ar);
             if (nCount == 0)
             {
@@ -66,17 +66,12 @@ namespace Server
                 return;
             }
 
-            string szRecv = Encoding.Default.GetString(clientInfo.buffRead, 0, nCount);
+            string szRecv = Encoding.Default.GetString(ClientState.buffRead, 0, nCount);
             byte[] buffSend = Encoding.Default.GetBytes($"OnServer：{szRecv}");
 
             client.Send(buffSend);
-            client.BeginReceive(clientInfo.buffRead, 0, 1024, 0, OnRecive, clientInfo);
+            client.BeginReceive(ClientState.buffRead, 0, 1024, 0, OnRecive, ClientState);
         }
     }
 
-    internal class ClientInfo
-    {
-        public Socket socket;
-        public byte[] buffRead = new byte[1024];
-    }
 }
